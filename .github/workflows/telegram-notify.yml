@@ -1,23 +1,18 @@
-name: Telegram Push Notification
+name: Telegram Notification
 
 on:
   push:
-    branches: [ main, develop ]  # Specify which branches to monitor
+    branches: [ main, develop ]
 
 jobs:
   notify:
     runs-on: ubuntu-latest
+    
     steps:
     - name: Send Telegram notification
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ secrets.TELEGRAM_CHAT_ID }}
-        token: ${{ secrets.GENZ_GITHUB_NOTIFIER }}
-        message: |
-          🚀 **New Push Alert**
-          
-          📁 Repository: ${{ github.repository }}
-          👤 Author: ${{ github.actor }}
-          🌿 Branch: ${{ github.ref_name }}
-          📝 Message: ${{ github.event.head_commit.message }}
-          🔗 [View Commit](${{ github.event.head_commit.url }})
+      run: |
+        curl -s -X POST https://api.telegram.org/bot${{ secrets.GENZ_GITHUB_NOTIFIER }}/sendMessage \
+          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+          -d message_thread_id=1 \
+          -d parse_mode=HTML \
+          -d text="🚀 <b>New Push Alert</b>%0A%0A📁 <b>Repository:</b> ${{ github.repository }}%0A👤 <b>Author:</b> ${{ github.actor }}%0A🌿 <b>Branch:</b> ${{ github.ref_name }}%0A📝 <b>Message:</b> ${{ github.event.head_commit.message }}%0A🔗 <a href=\"${{ github.event.head_commit.url }}\">View Commit</a>"
